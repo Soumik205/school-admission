@@ -120,6 +120,31 @@ public class HoldService(AppDbContext db, TimeProvider time, HoldSettings settin
         return ToResponse(hold);
     }
 
+    public async Task CancelAsync(string holdId, string studentId)
+    {
+        await using var transaction = await db.Database.BeginTransactionAsync();
+        var hold = await LockOwnedHoldAsync(holdId, studentId);
+        var now = time.GetUtcNow().UtcDateTime;
+
+        switch (hold.EffectiveStatus(now))
+        {
+            case HoldStatus.Cancelled:
+                return;
+            case HoldStatus.Confirmed:
+                throw new ApiException(StatusCodes.Status409Conflict, ErrorCodes.HoldAlreadyConfirmed,
+                    "Admission already confirmed", "Admission is already confirmed for this application.");
+            case HoldStatus.Expired:
+                await MarkExpiredAsync(hold, now);
+                await transaction.CommitAsync();
+                throw HoldExpired();
+        }
+
+        hold.Status = HoldStatus.Cancelled;
+        hold.UpdatedAt = now;
+        await db.SaveChangesAsync();
+        await transaction.CommitAsync();
+    }
+
     // The row lock serializes confirm, cancel and the sweeper on one hold, so whichever runs second
     // sees the first one's result. That is what makes a repeated confirm count only once.
     private async Task<Hold> LockOwnedHoldAsync(string holdId, string studentId)

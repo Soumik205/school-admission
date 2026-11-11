@@ -23,4 +23,11 @@ public class HoldsController(HoldService holds) : ControllerBase
     [HttpPost("holds/{holdId}/confirm")]
     public Task<HoldResponse> Confirm(string holdId, [FromHeader(Name = StudentIdHeader.Name)] string? studentId) =>
         holds.ConfirmAsync(holdId, StudentIdHeader.Validate(studentId));
+
+    [HttpDelete("holds/{holdId}")]
+    public async Task<IActionResult> Cancel(string holdId, [FromHeader(Name = StudentIdHeader.Name)] string? studentId)
+    {
+        await holds.CancelAsync(holdId, StudentIdHeader.Validate(studentId));
+        return NoContent();
+    }
 }
