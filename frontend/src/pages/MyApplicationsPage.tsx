@@ -4,7 +4,7 @@ import { api } from '../api/client'
 import { errorMessage } from '../api/errors'
 import { Alert } from '../components/Alert'
 import { StatusBadge } from '../components/StatusBadge'
-import { displayStatus, formatCountdown, formatDateTime, msLeft } from '../holdTime'
+import { displayStatus, formatCountdown, formatDateTime, formatTime, msLeft } from '../holdTime'
 import { useNow } from '../hooks/useNow'
 import { useStudentId } from '../hooks/useStudentId'
 
@@ -23,7 +23,9 @@ export function MyApplicationsPage() {
     <section>
       <div className="section-heading">
         <h2>My applications</h2>
-        {holds.isError && holds.data && <span className="notice">Could not refresh. Retrying.</span>}
+        {holds.isError && holds.data && <span className="notice">
+            Could not refresh. Showing data from {formatTime(holds.dataUpdatedAt)}.
+          </span>}
       </div>
 
       {!studentId && <p className="hint">Enter a birth registration number above to see applications.</p>}

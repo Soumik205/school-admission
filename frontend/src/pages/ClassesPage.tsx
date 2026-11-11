@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { api } from '../api/client'
 import { errorMessage } from '../api/errors'
 import { Alert } from '../components/Alert'
+import { formatTime } from '../holdTime'
 import { useStudentId } from '../hooks/useStudentId'
 
 export function ClassesPage() {
@@ -27,7 +28,9 @@ export function ClassesPage() {
     <section>
       <div className="section-heading">
         <h2>Classes</h2>
-        {classes.isError && classes.data && <span className="notice">Could not refresh. Retrying.</span>}
+        {classes.isError && classes.data && <span className="notice">
+            Could not refresh. Showing data from {formatTime(classes.dataUpdatedAt)}.
+          </span>}
       </div>
 
       {!studentId && <p className="hint">Enter a birth registration number above to apply.</p>}

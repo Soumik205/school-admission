@@ -66,6 +66,7 @@ async function request<T>(path: string, { method = 'GET', body, studentId }: Req
 }
 
 export const api = {
+  health: () => request<{ status: string }>('/health'),
   listClasses: () => request<SchoolClass[]>('/classes'),
   createClass: (input: CreateClassInput) => request<SchoolClass>('/classes', { method: 'POST', body: input }),
   applyForSeat: (classId: string, studentId: string) =>

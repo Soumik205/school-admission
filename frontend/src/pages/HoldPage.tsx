@@ -5,7 +5,7 @@ import { api } from '../api/client'
 import { errorMessage } from '../api/errors'
 import { Alert } from '../components/Alert'
 import { StatusBadge } from '../components/StatusBadge'
-import { displayStatus, formatCountdown, formatDateTime, msLeft } from '../holdTime'
+import { displayStatus, formatCountdown, formatDateTime, formatTime, msLeft } from '../holdTime'
 import { useNow } from '../hooks/useNow'
 import { useStudentId } from '../hooks/useStudentId'
 
@@ -58,7 +58,9 @@ export function HoldPage() {
     <section>
       <div className="section-heading">
         <h2>Application</h2>
-        {hold.isError && hold.data && <span className="notice">Could not refresh. Retrying.</span>}
+        {hold.isError && hold.data && <span className="notice">
+            Could not refresh. Showing data from {formatTime(hold.dataUpdatedAt)}.
+          </span>}
       </div>
 
       {hold.isPending && <p className="muted">Loading application.</p>}

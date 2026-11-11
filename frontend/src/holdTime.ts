@@ -20,3 +20,7 @@ export function formatCountdown(ms: number): string {
 export function formatDateTime(iso: string): string {
   return new Date(iso).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'medium' })
 }
+
+export function formatTime(ms: number): string {
+  return new Date(ms).toLocaleTimeString(undefined, { timeStyle: 'medium' })
+}
