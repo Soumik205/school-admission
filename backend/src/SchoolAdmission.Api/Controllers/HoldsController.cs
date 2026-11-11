@@ -16,4 +16,7 @@ public class HoldsController(HoldService holds) : ControllerBase
         var created = await holds.CreateAsync(classId, StudentIdHeader.Validate(studentId));
         return Created($"/holds/{created.HoldId}", created);
     }
+
+    [HttpGet("holds/{holdId}")]
+    public Task<HoldResponse> Get(string holdId) => holds.GetAsync(holdId);
 }

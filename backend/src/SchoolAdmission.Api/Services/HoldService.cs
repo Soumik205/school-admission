@@ -85,6 +85,20 @@ public class HoldService(AppDbContext db, TimeProvider time, HoldSettings settin
             hold.ExpiresAt, hold.CreatedAt);
     }
 
+    public async Task<HoldResponse> GetAsync(string holdId)
+    {
+        var hold = Guid.TryParse(holdId, out var id)
+            ? await db.Holds.AsNoTracking().Include(h => h.Class).SingleOrDefaultAsync(h => h.Id == id)
+            : null;
+        return ToResponse(hold ?? throw HoldNotFound());
+    }
+
+    private HoldResponse ToResponse(Hold hold) => new(hold.Id, hold.ClassId, hold.Class.Name, hold.StudentId,
+        hold.EffectiveStatus(time.GetUtcNow().UtcDateTime), hold.ExpiresAt, hold.CreatedAt, hold.ConfirmedAt);
+
+    private static ApiException HoldNotFound() => new(StatusCodes.Status404NotFound, ErrorCodes.HoldNotFound,
+        "Application not found", "This application could not be found.");
+
     private static ApiException AlreadyApplied() => new(StatusCodes.Status409Conflict, ErrorCodes.AlreadyApplied,
         "Already applied", "This student already has an active application or admission in this class.");
 }

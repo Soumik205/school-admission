@@ -10,3 +10,13 @@ public record HoldCreatedResponse(
     HoldStatus Status,
     DateTime ExpiresAt,
     DateTime CreatedAt);
+
+public record HoldResponse(
+    Guid HoldId,
+    Guid ClassId,
+    string ClassName,
+    string StudentId,
+    HoldStatus Status,
+    DateTime ExpiresAt,
+    DateTime CreatedAt,
+    DateTime? ConfirmedAt);

@@ -11,4 +11,7 @@ public class Hold
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
     public DateTime? ConfirmedAt { get; set; }
+
+    public HoldStatus EffectiveStatus(DateTime now) =>
+        Status == HoldStatus.Held && ExpiresAt <= now ? HoldStatus.Expired : Status;
 }
