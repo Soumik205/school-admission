@@ -22,6 +22,14 @@ builder.Services.AddScoped<ClassService>();
 builder.Services.AddScoped<HoldService>();
 builder.Services.AddHostedService<ExpiredHoldSweeper>();
 
+var corsOrigins = (builder.Configuration["CORS_ALLOWED_ORIGINS"] ?? "http://localhost:3000,http://localhost:5173")
+    .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+builder.Services.AddCors(options => options.AddDefaultPolicy(policy => policy
+    .WithOrigins(corsOrigins)
+    .AllowAnyHeader()
+    .AllowAnyMethod()
+    .WithExposedHeaders("Location")));
+
 builder.Services.AddApiProblemDetails();
 
 builder.Services.AddControllers()
@@ -37,6 +45,7 @@ await DatabaseMigrator.MigrateAsync(app.Services);
 
 app.UseExceptionHandler();
 app.UseStatusCodePages();
+app.UseCors();
 
 app.MapControllers();
 
