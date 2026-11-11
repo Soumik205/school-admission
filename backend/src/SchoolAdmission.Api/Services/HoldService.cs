@@ -93,6 +93,70 @@ public class HoldService(AppDbContext db, TimeProvider time, HoldSettings settin
         return ToResponse(hold ?? throw HoldNotFound());
     }
 
+    public async Task<HoldResponse> ConfirmAsync(string holdId, string studentId)
+    {
+        await using var transaction = await db.Database.BeginTransactionAsync();
+        var hold = await LockOwnedHoldAsync(holdId, studentId);
+        var now = time.GetUtcNow().UtcDateTime;
+
+        switch (hold.EffectiveStatus(now))
+        {
+            case HoldStatus.Confirmed:
+                return ToResponse(hold);
+            case HoldStatus.Cancelled:
+                throw new ApiException(StatusCodes.Status409Conflict, ErrorCodes.HoldCancelled,
+                    "Application cancelled", "This application was cancelled.");
+            case HoldStatus.Expired:
+                await MarkExpiredAsync(hold, now);
+                await transaction.CommitAsync();
+                throw HoldExpired();
+        }
+
+        hold.Status = HoldStatus.Confirmed;
+        hold.ConfirmedAt = now;
+        hold.UpdatedAt = now;
+        await db.SaveChangesAsync();
+        await transaction.CommitAsync();
+        return ToResponse(hold);
+    }
+
+    // The row lock serializes confirm, cancel and the sweeper on one hold, so whichever runs second
+    // sees the first one's result. That is what makes a repeated confirm count only once.
+    private async Task<Hold> LockOwnedHoldAsync(string holdId, string studentId)
+    {
+        if (!Guid.TryParse(holdId, out var id))
+        {
+            throw HoldNotFound();
+        }
+
+        var locked = await db.Holds
+            .FromSql($"SELECT * FROM holds WHERE id = {id} FOR UPDATE")
+            .ToListAsync();
+        var hold = locked.SingleOrDefault() ?? throw HoldNotFound();
+
+        if (hold.StudentId != studentId)
+        {
+            throw new ApiException(StatusCodes.Status403Forbidden, ErrorCodes.HoldNotOwned,
+                "Not your application", "This application belongs to a different birth registration number.");
+        }
+
+        await db.Entry(hold).Reference(h => h.Class).LoadAsync();
+        return hold;
+    }
+
+    private async Task MarkExpiredAsync(Hold hold, DateTime now)
+    {
+        if (hold.Status == HoldStatus.Held)
+        {
+            hold.Status = HoldStatus.Expired;
+            hold.UpdatedAt = now;
+            await db.SaveChangesAsync();
+        }
+    }
+
+    private static ApiException HoldExpired() => new(StatusCodes.Status409Conflict, ErrorCodes.HoldExpired,
+        "Application expired", "This application has expired and the seat was released.");
+
     private HoldResponse ToResponse(Hold hold) => new(hold.Id, hold.ClassId, hold.Class.Name, hold.StudentId,
         hold.EffectiveStatus(time.GetUtcNow().UtcDateTime), hold.ExpiresAt, hold.CreatedAt, hold.ConfirmedAt);
 

@@ -19,4 +19,8 @@ public class HoldsController(HoldService holds) : ControllerBase
 
     [HttpGet("holds/{holdId}")]
     public Task<HoldResponse> Get(string holdId) => holds.GetAsync(holdId);
+
+    [HttpPost("holds/{holdId}/confirm")]
+    public Task<HoldResponse> Confirm(string holdId, [FromHeader(Name = StudentIdHeader.Name)] string? studentId) =>
+        holds.ConfirmAsync(holdId, StudentIdHeader.Validate(studentId));
 }
