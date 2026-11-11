@@ -24,6 +24,9 @@ public static class TestApi
     public static async Task<ClassDto> GetClassAsync(this HttpClient client, string classId) =>
         (await client.GetFromJsonAsync<ClassDto>($"/classes/{classId}", Json))!;
 
+    public static async Task<HoldDto> GetHoldAsync(this HttpClient client, string holdId) =>
+        (await client.GetFromJsonAsync<HoldDto>($"/holds/{holdId}", Json))!;
+
     public static Task<HttpResponseMessage> HoldAsync(this HttpClient client, string classId, string? studentId) =>
         client.SendAsync(WithStudent(HttpMethod.Post, $"/classes/{classId}/holds", studentId));
 
