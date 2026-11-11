@@ -6,6 +6,7 @@ namespace SchoolAdmission.Api.Data;
 public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
 {
     public const string ClassNameUniqueIndex = "ux_classes_name_lower";
+    public const string ActiveHoldUniqueIndex = "ux_holds_class_student_active";
 
     public DbSet<SchoolClass> Classes => Set<SchoolClass>();
     public DbSet<Hold> Holds => Set<Hold>();
@@ -43,7 +44,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             entity.HasIndex(h => new { h.ClassId, h.StudentId })
                 .IsUnique()
                 .HasFilter("status IN ('HELD', 'CONFIRMED')")
-                .HasDatabaseName("ux_holds_class_student_active");
+                .HasDatabaseName(ActiveHoldUniqueIndex);
 
             entity.HasIndex(h => new { h.ClassId, h.Status });
 

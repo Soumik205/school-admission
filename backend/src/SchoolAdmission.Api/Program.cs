@@ -16,7 +16,9 @@ builder.Services.AddDbContext<AppDbContext>(options => options
     .UseSnakeCaseNamingConvention());
 
 builder.Services.AddSingleton(TimeProvider.System);
+builder.Services.AddSingleton(HoldSettings.FromConfiguration(builder.Configuration));
 builder.Services.AddScoped<ClassService>();
+builder.Services.AddScoped<HoldService>();
 
 builder.Services.AddApiProblemDetails();
 
