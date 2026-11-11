@@ -1,5 +1,6 @@
 import { NavLink, Route, Routes } from 'react-router-dom'
 import { StudentIdBar } from './components/StudentIdBar'
+import { ClassesPage } from './pages/ClassesPage'
 
 export default function App() {
   return (
@@ -17,7 +18,7 @@ export default function App() {
       <StudentIdBar />
       <main>
         <Routes>
-          <Route path="/" element={<h2>Classes</h2>} />
+          <Route path="/" element={<ClassesPage />} />
           <Route path="/me" element={<h2>My applications</h2>} />
           <Route path="/admin/classes/new" element={<h2>Create class</h2>} />
           <Route path="*" element={<p>Page not found.</p>} />
