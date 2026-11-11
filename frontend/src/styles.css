@@ -332,3 +332,11 @@ td.actions button {
     margin-bottom: 8px;
   }
 }
+
+.hold-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 16px 0;
+}
