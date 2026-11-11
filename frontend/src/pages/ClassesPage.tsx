@@ -1,14 +1,26 @@
-import { useQuery } from '@tanstack/react-query'
-import { Link } from 'react-router-dom'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { Link, useNavigate } from 'react-router-dom'
 import { api } from '../api/client'
 import { errorMessage } from '../api/errors'
 import { Alert } from '../components/Alert'
+import { useStudentId } from '../hooks/useStudentId'
 
 export function ClassesPage() {
   const classes = useQuery({
     queryKey: ['classes'],
     queryFn: api.listClasses,
     refetchInterval: 3000,
+  })
+  const { studentId } = useStudentId()
+  const navigate = useNavigate()
+  const queryClient = useQueryClient()
+
+  const apply = useMutation({
+    mutationFn: (classId: string) => api.applyForSeat(classId, studentId!),
+    onSuccess: (hold) => {
+      queryClient.invalidateQueries({ queryKey: ['classes'] })
+      navigate(`/holds/${hold.holdId}`)
+    },
   })
 
   return (
@@ -17,6 +29,9 @@ export function ClassesPage() {
         <h2>Classes</h2>
         {classes.isError && classes.data && <span className="notice">Could not refresh. Retrying.</span>}
       </div>
+
+      {!studentId && <p className="hint">Enter a birth registration number above to apply.</p>}
+      {apply.isError && <Alert>{errorMessage(apply.error)}</Alert>}
 
       {classes.isPending && <p className="muted">Loading classes.</p>}
 
@@ -38,6 +53,7 @@ export function ClassesPage() {
                 <th className="num">Held</th>
                 <th className="num">Confirmed</th>
                 <th className="num">Available</th>
+                <th aria-label="Actions" />
               </tr>
             </thead>
             <tbody>
@@ -49,6 +65,15 @@ export function ClassesPage() {
                   <td className="num">{schoolClass.confirmedSeats}</td>
                   <td className={schoolClass.availableSeats === 0 ? 'num full' : 'num'}>
                     {schoolClass.availableSeats === 0 ? 'Full' : schoolClass.availableSeats}
+                  </td>
+                  <td className="actions">
+                    <button
+                      type="button"
+                      disabled={!studentId || apply.isPending}
+                      onClick={() => apply.mutate(schoolClass.id)}
+                    >
+                      {apply.isPending && apply.variables === schoolClass.id ? 'Applying' : 'Apply'}
+                    </button>
                   </td>
                 </tr>
               ))}

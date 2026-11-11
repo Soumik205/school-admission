@@ -2,6 +2,7 @@ import { NavLink, Route, Routes } from 'react-router-dom'
 import { StudentIdBar } from './components/StudentIdBar'
 import { ClassesPage } from './pages/ClassesPage'
 import { CreateClassPage } from './pages/CreateClassPage'
+import { HoldPage } from './pages/HoldPage'
 
 export default function App() {
   return (
@@ -22,6 +23,7 @@ export default function App() {
           <Route path="/" element={<ClassesPage />} />
           <Route path="/me" element={<h2>My applications</h2>} />
           <Route path="/admin/classes/new" element={<CreateClassPage />} />
+          <Route path="/holds/:holdId" element={<HoldPage />} />
           <Route path="*" element={<p>Page not found.</p>} />
         </Routes>
       </main>
