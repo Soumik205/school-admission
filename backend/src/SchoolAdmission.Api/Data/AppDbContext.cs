@@ -5,6 +5,8 @@ namespace SchoolAdmission.Api.Data;
 
 public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
 {
+    public const string ClassNameUniqueIndex = "ux_classes_name_lower";
+
     public DbSet<SchoolClass> Classes => Set<SchoolClass>();
     public DbSet<Hold> Holds => Set<Hold>();
 
