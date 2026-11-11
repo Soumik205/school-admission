@@ -29,5 +29,16 @@ services:
       db:
         condition: service_healthy
 
+  backend-tests:
+    profiles: ["test"]
+    build:
+      context: ./backend
+      target: test
+    environment:
+      TEST_DB_CONNECTION: "Host=db;Port=5432;Database=school_admission_test;Username=postgres;Password=postgres;Maximum Pool Size=50"
+    depends_on:
+      db:
+        condition: service_healthy
+
 volumes:
   pgdata:
