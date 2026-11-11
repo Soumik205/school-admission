@@ -29,6 +29,15 @@ services:
       db:
         condition: service_healthy
 
+  frontend:
+    build: ./frontend
+    environment:
+      API_BASE_URL: "${API_BASE_URL:-http://localhost:8080}"
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+
   backend-tests:
     profiles: ["test"]
     build:
