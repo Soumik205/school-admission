@@ -1,6 +1,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore;
+using SchoolAdmission.Api.Background;
 using SchoolAdmission.Api.Data;
 using SchoolAdmission.Api.Errors;
 using SchoolAdmission.Api.Services;
@@ -19,6 +20,7 @@ builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddSingleton(HoldSettings.FromConfiguration(builder.Configuration));
 builder.Services.AddScoped<ClassService>();
 builder.Services.AddScoped<HoldService>();
+builder.Services.AddHostedService<ExpiredHoldSweeper>();
 
 builder.Services.AddApiProblemDetails();
 

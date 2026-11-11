@@ -1,21 +1,22 @@
 namespace SchoolAdmission.Api.Services;
 
-public record HoldSettings(TimeSpan HoldDuration)
+public record HoldSettings(TimeSpan HoldDuration, TimeSpan SweepInterval)
 {
-    public const int DefaultHoldDurationSeconds = 600;
+    public static HoldSettings FromConfiguration(IConfiguration configuration) => new(
+        ReadSeconds(configuration, "HOLD_DURATION_SECONDS", 600),
+        ReadSeconds(configuration, "EXPIRY_SWEEP_INTERVAL_SECONDS", 15));
 
-    public static HoldSettings FromConfiguration(IConfiguration configuration)
+    private static TimeSpan ReadSeconds(IConfiguration configuration, string key, int defaultSeconds)
     {
-        var raw = configuration["HOLD_DURATION_SECONDS"];
+        var raw = configuration[key];
         if (string.IsNullOrWhiteSpace(raw))
         {
-            return new HoldSettings(TimeSpan.FromSeconds(DefaultHoldDurationSeconds));
+            return TimeSpan.FromSeconds(defaultSeconds);
         }
         if (!int.TryParse(raw, out var seconds) || seconds <= 0)
         {
-            throw new InvalidOperationException(
-                $"HOLD_DURATION_SECONDS must be a positive whole number of seconds, but was '{raw}'.");
+            throw new InvalidOperationException($"{key} must be a positive whole number of seconds, but was '{raw}'.");
         }
-        return new HoldSettings(TimeSpan.FromSeconds(seconds));
+        return TimeSpan.FromSeconds(seconds);
     }
 }
