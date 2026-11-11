@@ -93,6 +93,17 @@ public class HoldService(AppDbContext db, TimeProvider time, HoldSettings settin
         return ToResponse(hold ?? throw HoldNotFound());
     }
 
+    public async Task<List<HoldResponse>> ListForStudentAsync(string studentId)
+    {
+        var holds = await db.Holds.AsNoTracking()
+            .Include(h => h.Class)
+            .Where(h => h.StudentId == studentId)
+            .OrderByDescending(h => h.CreatedAt)
+            .ThenByDescending(h => h.Id)
+            .ToListAsync();
+        return holds.Select(ToResponse).ToList();
+    }
+
     public async Task<HoldResponse> ConfirmAsync(string holdId, string studentId)
     {
         await using var transaction = await db.Database.BeginTransactionAsync();
